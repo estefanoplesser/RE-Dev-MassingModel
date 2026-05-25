@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parc des Docks — Refined 3D Massing Model</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; background:#2a2e35; color:#f0f2f5; }
+  #canvas-container { width:100vw; height:100vh; cursor:grab; }
+  #canvas-container:active { cursor:grabbing; }
+  .panel { position:absolute; background:rgba(20,24,32,0.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:16px 18px; font-size:12px; letter-spacing:0.2px;
+    box-shadow:0 10px 32px rgba(0,0,0,0.25); }
+  #title { top:24px; left:24px; }
+  #title h1 { margin:0; font-size:17px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+  #title p { margin:5px 0 0; font-size:11px; opacity:0.55; letter-spacing:0.5px; }
+  #legend { top:24px; right:24px; min-width:230px; max-height:calc(100vh - 48px); overflow-y:auto; }
+  .panel h3 { margin:0 0 10px; font-size:10px; font-weight:700; opacity:0.55; text-transform:uppercase; letter-spacing:2.2px; }
+  .legend-row { display:flex; align-items:center; padding:4px 0; font-size:11.5px; }
+  .swatch { width:14px; height:14px; margin-right:11px; border-radius:3px; border:1px solid rgba(255,255,255,0.14); flex-shrink:0; }
+  #stats { bottom:24px; left:24px; min-width:268px; max-height:calc(100vh - 130px); overflow-y:auto; }
+  #stats .row { display:flex; justify-content:space-between; padding:3px 0; font-size:11.5px; }
+  #stats .row.divider { border-top:1px solid rgba(255,255,255,0.1); margin-top:6px; padding-top:6px; font-weight:600; }
+  #stats .row span:first-child { opacity:0.65; }
+  #stats .row span:last-child { font-variant-numeric:tabular-nums; }
+  #help { bottom:24px; right:24px; font-size:10.5px; opacity:0.65; padding:10px 14px; display:flex; gap:14px; align-items:center; }
+  #help kbd { background:rgba(255,255,255,0.09); border-radius:3px; padding:2px 6px; font-size:10px;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace; margin-right:4px; }
+  .scale-bar { display:inline-flex; align-items:center; gap:6px; margin-left:4px; padding-left:14px; border-left:1px solid rgba(255,255,255,0.15); }
+  .bar { width:50px; height:3px; background:#f0f2f5; border-radius:1px; }
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+
+<div class="panel" id="title">
+  <h1>ZAC des Docks — Master Plan</h1>
+  <p>Multifamily on parking podium · dock-side truck yard · 10.9 ha</p>
+</div>
+
+<div class="panel" id="legend">
+  <h3>Residential · Parc des Docks</h3>
+  <div class="legend-row"><div class="swatch" style="background:#9c5f4e"></div>PBSA · brick dock-sheds</div>
+  <div class="legend-row"><div class="swatch" style="background:#d9cdb3"></div>Multifamily · Parisian L-block</div>
+  <div class="legend-row"><div class="swatch" style="background:#53585f"></div>Zinc mansard roofs</div>
+  <div class="legend-row"><div class="swatch" style="background:#6b7079"></div>Parking deck · green+solar roof</div>
+  <div class="legend-row"><div class="swatch" style="background:#4DA6D9"></div>Pond · reed beds</div>
+  <div class="legend-row"><div class="swatch" style="background:#7DA858"></div>Park · lawn / gardens</div>
+  <div class="legend-row"><div class="swatch" style="background:#c9bb9c"></div>Footpaths · pedestrian access</div>
+  <div class="legend-row"><div class="swatch" style="background:#33373d"></div>Roads · car access</div>
+  <h3 style="margin-top:14px;">Commercial · Costco ZAC</h3>
+  <div class="legend-row"><div class="swatch" style="background:#e07a1f"></div>Costco · two-entrance L</div>
+  <div class="legend-row"><div class="swatch" style="background:#2f6fa8"></div>Retail park · 2 floors</div>
+  <div class="legend-row"><div class="swatch" style="background:#5a9e3a"></div>Logistics · terraced + ramp</div>
+  <div class="legend-row"><div class="swatch" style="background:#9b6fb0"></div>SME / storage (set-back L2)</div>
+  <div class="legend-row"><div class="swatch" style="background:#1f9c8f"></div>Sports hall (on SME roof)</div>
+  <div class="legend-row"><div class="swatch" style="background:#8b9199"></div>Truck yard · loading docks</div>
+  <div class="legend-row"><div class="swatch" style="background:#1b2942"></div>Rooftop solar arrays</div>
+</div>
+
+<div class="panel" id="stats">
+  <h3>Residential</h3>
+  <div class="row"><span>PBSA (×2)</span><span>9,690 m²</span></div>
+  <div class="row"><span>Multifamily L-block</span><span>8,200 m²</span></div>
+  <div class="row"><span>Parking deck</span><span>1,820 m²</span></div>
+  <div class="row"><span>Pond + reeds</span><span>5,400 m²</span></div>
+  <div class="row"><span>Park + gardens</span><span>20,400 m²</span></div>
+  <div class="row"><span>GIA · FAR 1.35</span><span>67,504 m²</span></div>
+  <h3 style="margin-top:14px;">Commercial</h3>
+  <div class="row"><span>Costco warehouse</span><span>20,111 m²</span></div>
+  <div class="row"><span>Logistics (×3)</span><span>29,784 m²</span></div>
+  <div class="row"><span>Retail park (×2)</span><span>17,968 m²</span></div>
+  <div class="row"><span>Rooftop sports hall</span><span>5,000 m²</span></div>
+  <div class="row"><span>Truck terminal</span><span>9,400 m²</span></div>
+  <div class="row"><span>GFA · FAR 1.30</span><span>76,543 m²</span></div>
+  <div class="row divider"><span>Combined site</span><span>109,000 m²</span></div>
+  <div class="row divider"><span>Combined GFA</span><span>144,047 m²</span></div>
+</div>
+
+<div class="panel" id="help">
+  <span><kbd>Drag</kbd>orbit · <kbd>Scroll</kbd>zoom · <kbd>Right-click</kbd>pan</span>
+  <span class="scale-bar"><span class="bar"></span>50 m</span>
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ============================================================
+   PARC DES DOCKS — REFINED 3D MASSING MODEL
+   X = East-West, Z = North-South (-Z = North). Units: metres.
+   ============================================================ */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xe6eaef);
+scene.fog = new THREE.Fog(0xe6eaef, 600, 1350);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.5, 3000);
+camera.position.set(340, 280, 390);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.07;
+controls.target.set(-15, 14, 112);
+controls.maxPolarAngle = Math.PI*0.49;
+controls.minDistance = 100; controls.maxDistance = 1300;
+controls.update();
+
+/* ---------- Lighting ---------- */
+scene.add(new THREE.HemisphereLight(0xbccfdc, 0x4a5648, 0.5));
+const sun = new THREE.DirectionalLight(0xfff1d6, 1.15);
+sun.position.set(215, 200, 95); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+const s = 340;
+sun.shadow.camera.left=-s; sun.shadow.camera.right=s; sun.shadow.camera.top=s; sun.shadow.camera.bottom=-s;
+sun.shadow.camera.near=0.5; sun.shadow.camera.far=1200; sun.shadow.bias=-0.0008; sun.shadow.normalBias=0.04;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xc8d8e6, 0.32);
+fill.position.set(-120, 110, -90); scene.add(fill);
+
+/* ---------- Materials ---------- */
+const M = {
+  pbsa:new THREE.MeshLambertMaterial({color:0x9c5f4e}), slate:new THREE.MeshLambertMaterial({color:0x3b4046}),
+  mfr:new THREE.MeshLambertMaterial({color:0xd9cdb3}), mansard:new THREE.MeshLambertMaterial({color:0x53585f}),
+  mansardT:new THREE.MeshLambertMaterial({color:0x5e636b}), metal:new THREE.MeshLambertMaterial({color:0x6b7079}), podium:new THREE.MeshLambertMaterial({color:0x4b4f56}),
+  retail:new THREE.MeshLambertMaterial({color:0xc98f54}), glass:new THREE.MeshLambertMaterial({color:0x9ec6d8,transparent:true,opacity:0.55}),
+  lake:new THREE.MeshLambertMaterial({color:0x4DA6D9,transparent:true,opacity:0.92}), dock:new THREE.MeshLambertMaterial({color:0x3f7fa3,transparent:true,opacity:0.94}),
+  reeds:new THREE.MeshLambertMaterial({color:0x2D5016}), trunk:new THREE.MeshLambertMaterial({color:0x6e4b2a}),
+  crown:new THREE.MeshLambertMaterial({color:0x3F7A3F}), crown2:new THREE.MeshLambertMaterial({color:0x5a8f4a}),
+  green:new THREE.MeshLambertMaterial({color:0x7DA858}), garden:new THREE.MeshLambertMaterial({color:0x5d7d44}),
+  flower:new THREE.MeshLambertMaterial({color:0x9f8f4c}), terrace:new THREE.MeshLambertMaterial({color:0x6f9a55}),
+  hedge:new THREE.MeshLambertMaterial({color:0x47692f}), path:new THREE.MeshLambertMaterial({color:0xc9bb9c}),
+  plaza:new THREE.MeshLambertMaterial({color:0xb6b0a3}), road:new THREE.MeshLambertMaterial({color:0x33373d}),
+  solar:new THREE.MeshLambertMaterial({color:0x1b2942}), tray:new THREE.MeshLambertMaterial({color:0x1d2026}),
+  costco:new THREE.MeshLambertMaterial({color:0xe07a1f}), costcoDark:new THREE.MeshLambertMaterial({color:0xb5621a}),
+  retailC:new THREE.MeshLambertMaterial({color:0x2f6fa8}), logistics:new THREE.MeshLambertMaterial({color:0x5a9e3a}),
+  sme:new THREE.MeshLambertMaterial({color:0x9b6fb0}), leisure:new THREE.MeshLambertMaterial({color:0x1f9c8f}),
+  fuel:new THREE.MeshLambertMaterial({color:0xb5359c}), cpark:new THREE.MeshLambertMaterial({color:0x9aa0a8}),
+  asphalt:new THREE.MeshLambertMaterial({color:0x3b3f46}), steel:new THREE.MeshLambertMaterial({color:0x8b9199}),
+};
+const edgeMat = new THREE.LineBasicMaterial({ color:0x0f1117, transparent:true, opacity:0.5 });
+
+/* ---------- Helpers ---------- */
+function box(w,h,d,cx,yB,cz,mat,o={}) {
+  const g=new THREE.BoxGeometry(w,h,d), m=new THREE.Mesh(g,mat);
+  m.position.set(cx,yB+h/2,cz); m.castShadow=o.cast!==false; m.receiveShadow=true;
+  if(o.rotY) m.rotation.y=o.rotY; scene.add(m);
+  if(o.edges!==false){ const e=new THREE.LineSegments(new THREE.EdgesGeometry(g),edgeMat);
+    e.position.copy(m.position); if(o.rotY) e.rotation.y=o.rotY; scene.add(e); }
+  return m;
+}
+function rect(x1,x2,z1,z2,h,yB,mat,o){ return box(x2-x1,h,z2-z1,(x1+x2)/2,yB,(z1+z2)/2,mat,o); }
+function roofPad(x1,x2,z1,z2,y,mat){ rect(x1,x2,z1,z2,0.3,y,mat,{cast:false,edges:false}); }
+function prism(pts,h,yB,mat,o={}) {
+  const sh=new THREE.Shape(); sh.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length;i++) sh.lineTo(pts[i][0],pts[i][1]); sh.closePath();
+  const g=new THREE.ExtrudeGeometry(sh,{depth:h,bevelEnabled:false});
+  g.rotateX(Math.PI/2); g.translate(0,yB+h,0);
+  const m=new THREE.Mesh(g,mat); m.castShadow=o.cast!==false; m.receiveShadow=true; scene.add(m);
+  if(o.edges!==false) scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),edgeMat));
+  return m;
+}
+function terracedBar(x1,x2,z1,z2,fH,fl,sb,dir,mat,capMat,padMat){
+  for(let i=0;i<fl;i++){
+    let a=x1,b=x2,c=z1,d=z2; const s=sb*i;
+    if(dir==='+x')b=x2-s; else if(dir==='-x')a=x1+s; else if(dir==='+z')d=z2-s; else if(dir==='-z')c=z1+s;
+    rect(a,b,c,d,fH,i*fH,(capMat&&i===fl-1)?capMat:mat);
+    if(padMat&&i>0){ const y=i*fH,p=sb*(i-1);
+      if(dir==='+x')roofPad(x2-s,x2-p,c,d,y,padMat); else if(dir==='-x')roofPad(x1+p,x1+s,c,d,y,padMat);
+      else if(dir==='+z')roofPad(a,b,z2-s,z2-p,y,padMat); else if(dir==='-z')roofPad(a,b,z1+p,z1+s,y,padMat); }
+  }
+}
+function finRowX(x1,x2,fz,zd,yB,h,sp,fw,pr,mat){
+  for(let x=x1+sp/2;x<x2;x+=sp) rect(x-fw/2,x+fw/2,fz,fz+zd*pr,h,yB,mat,{edges:false});
+}
+function sawtoothRoof(x1,x2,z1,z2,yB,teeth,ph,mat){
+  const W=x2-x1,td=(z2-z1)/teeth;
+  for(let i=0;i<teeth;i++){
+    const sh=new THREE.Shape(); sh.moveTo(0,0); sh.lineTo(td,0); sh.lineTo(0,ph); sh.closePath();
+    const g=new THREE.ExtrudeGeometry(sh,{depth:W,bevelEnabled:false});
+    g.rotateY(Math.PI/2); g.translate(x1,yB,z1+i*td+td);
+    const m=new THREE.Mesh(g,mat); m.castShadow=true; m.receiveShadow=true; scene.add(m);
+    scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),edgeMat));
+  }
+}
+function mansard(x1,x2,z1,z2,yB,h,mat,k=0.6){
+  const w=x2-x1,d=z2-z1;
+  const g=new THREE.CylinderGeometry(k,1,h,4,1); g.rotateY(Math.PI/4);
+  g.scale(w/Math.SQRT2,1,d/Math.SQRT2); g.translate((x1+x2)/2,yB+h/2,(z1+z2)/2);
+  const m=new THREE.Mesh(g,mat); m.castShadow=true; m.receiveShadow=true; scene.add(m);
+  scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),edgeMat));
+  const ix=w*(1-k)/2, iz=d*(1-k)/2;
+  roofPad(x1+ix+0.5,x2-ix-0.5,z1+iz+0.5,z2-iz-0.5,yB+h,M.mansardT);
+}
+function dormers(x1,x2,zFace,zd,yB,n){
+  for(let i=0;i<n;i++){ const x=x1+(i+0.5)*(x2-x1)/n;
+    box(2.6,2.3,1.8,x,yB+0.6,zFace+zd*0.3,M.mansardT,{edges:false}); }
+}
+function solarField(x1,x2,z1,z2,y){
+  const rd=5,gap=2.6;
+  for(let z=z1+4;z<z2-6;z+=rd+gap){
+    const r=new THREE.Mesh(new THREE.BoxGeometry(Math.max(2,x2-x1-8),0.3,rd),M.solar);
+    r.position.set((x1+x2)/2,y+0.95,z+rd/2); r.rotation.x=-0.34; r.castShadow=true; scene.add(r);
+  }
+}
+function spiralRamp(cx,cz,rMid,rampW,yTop,turns){
+  const total=Math.PI*2*turns, segs=Math.round(turns*42);
+  for(let i=0;i<=segs;i++){
+    const a=(i/segs)*total, y=(i/segs)*yTop, arc=(total/segs)*rMid*1.4;
+    const b=new THREE.Mesh(new THREE.BoxGeometry(rampW,0.7,arc),M.steel);
+    b.position.set(cx+Math.cos(a)*rMid,y,cz+Math.sin(a)*rMid);
+    b.rotation.y=-a; b.castShadow=true; b.receiveShadow=true; scene.add(b);
+  }
+  const core=new THREE.Mesh(new THREE.CylinderGeometry(rMid-rampW/2-1,rMid-rampW/2-1,yTop+1.5,36),M.logistics);
+  core.position.set(cx,(yTop+1.5)/2,cz); core.castShadow=true; core.receiveShadow=true; scene.add(core);
+  for(let k=0;k<10;k++){ const a=k/10*Math.PI*2, R=rMid+rampW/2-0.6;
+    rect(cx+Math.cos(a)*R-0.7,cx+Math.cos(a)*R+0.7,cz+Math.sin(a)*R-0.7,cz+Math.sin(a)*R+0.7,yTop,0,M.steel,{edges:false}); }
+  const deck=new THREE.Mesh(new THREE.TorusGeometry(rMid,rampW/2,4,48),M.steel);
+  deck.rotation.x=Math.PI/2; deck.position.set(cx,yTop+0.4,cz); deck.castShadow=true; scene.add(deck);
+}
+// pedestrian footpath
+function walkway(pts,width){
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i],b=pts[i+1],dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(width,0.18,L),M.path);
+    m.position.set((a[0]+b[0])/2,0.13,(a[1]+b[1])/2); m.rotation.y=Math.atan2(dx,dz);
+    m.receiveShadow=true; scene.add(m);
+  }
+  for(const p of pts){ const c=new THREE.Mesh(new THREE.CircleGeometry(width/2,20),M.path);
+    c.rotation.x=-Math.PI/2; c.position.set(p[0],0.135,p[1]); c.receiveShadow=true; scene.add(c); }
+}
+// vehicular road with dashed centre line
+function road(pts,width){
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i],b=pts[i+1],dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz),ang=Math.atan2(dx,dz);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(width,0.22,L),M.road);
+    m.position.set((a[0]+b[0])/2,0.16,(a[1]+b[1])/2); m.rotation.y=ang; m.receiveShadow=true; scene.add(m);
+    const dn=Math.max(1,Math.floor(L/7));
+    for(let d=0;d<dn;d++){ const t=(d+0.5)/dn;
+      const dash=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.05,2.6),new THREE.MeshBasicMaterial({color:0xe6d24a}));
+      dash.position.set(a[0]+dx*t,0.29,a[1]+dz*t); dash.rotation.y=ang; scene.add(dash); }
+  }
+  for(const p of pts){ const c=new THREE.Mesh(new THREE.CircleGeometry(width/2,20),M.road);
+    c.rotation.x=-Math.PI/2; c.position.set(p[0],0.17,p[1]); c.receiveShadow=true; scene.add(c); }
+}
+// gateway marker at an access point
+function gate(x,z,carPark){
+  const c=carPark?M.road:M.path;
+  rect(x-4,x-3,z-0.6,z+0.6,3.6,0,M.metal,{edges:false});
+  rect(x+3,x+4,z-0.6,z+0.6,3.6,0,M.metal,{edges:false});
+  rect(x-4,x+4,z-0.7,z+0.7,0.7,3.6,M.metal,{edges:false});
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(1.6,24),new THREE.MeshBasicMaterial({color:carPark?0x4a90c4:0x6f9a55}));
+  disc.rotation.x=-Math.PI/2; disc.position.set(x,0.2,z+(carPark?6:5)); scene.add(disc);
+}
+function hedge(x1,x2,z1,z2){ rect(x1,x2,z1,z2,1.1,0,M.hedge,{edges:false}); }
+function bush(x,z,r){ const b=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),M.crown2);
+  b.position.set(x,r*0.78,z); b.scale.y=0.8; b.castShadow=true; scene.add(b); }
+function car(x,z,rot,c){ box(2,1.5,4.6,x,0.12,z,new THREE.MeshLambertMaterial({color:c}),{edges:false,rotY:rot}); }
+
+/* ============================================================
+   SITE BASE
+   ============================================================ */
+const SITE_W=250, SITE_D=200, COMM_D=236;
+const tray=new THREE.Mesh(new THREE.BoxGeometry(348,1.5,470),M.tray);
+tray.position.set(-35,-1.0,118); tray.receiveShadow=true; scene.add(tray);
+const ground=new THREE.Mesh(new THREE.BoxGeometry(SITE_W,0.4,SITE_D),M.green);
+ground.position.y=-0.2; ground.receiveShadow=true; scene.add(ground);
+const groundC=new THREE.Mesh(new THREE.BoxGeometry(SITE_W,0.4,COMM_D),M.asphalt);
+groundC.position.set(0,-0.2,100+COMM_D/2); groundC.receiveShadow=true; scene.add(groundC);
+
+/* ============================================================
+   ACCESS NETWORK — roads (car) + footpaths (pedestrian)
+   ============================================================ */
+// --- ROADS (car access) ---
+road([[12,108],[12,124],[-30,150],[-30,300],[-30,332]]);          // commercial spine from divider
+road([[60,108],[60,205],[60,300],[78,322]]);                       // car-park + fuel access
+road([[132,250],[112,250],[64,255]]);                              // Costco car-park from east street
+road([[132,200],[112,200]]);                                       // Costco east-entrance approach
+road([[-118,-108],[-118,-80],[-110,-44]]);                         // residential parking-deck access
+road([[-118,-108],[-150,-108],[-150,170],[-150,330]]);             // west dock service road
+road([[44,108],[46,90],[64,82],[58,70]]);                          // residents' drop-off loop (MFR)
+road([[-12,90],[12,108]]);                                         // divider link
+// --- FOOTPATHS (pedestrian access) ---
+walkway([[88,-104],[80,-86],[62,-70],[52,-58]],4);                 // north entrance -> MFR plaza
+walkway([[18,108],[10,92],[-4,64],[-14,30]],4.5);                  // divider main entrance -> park
+walkway([[128,-22],[104,-12],[74,2],[44,14]],4);                   // east entrance -> park
+walkway([[-118,-70],[-96,-58],[-72,-46],[-44,-40]],4);             // NW entrance (by deck) -> park
+walkway([[-14,30],[-44,18],[-66,30],[-80,12]],3.6);                // park loop to PBSA
+walkway([[-14,30],[8,-20],[-2,-46],[-30,-58]],3.6);                // park loop to pond/MFR
+walkway([[-108,84],[-58,80],[-6,86],[52,82],[108,86]],4.2);        // southern park promenade
+walkway([[64,232],[67,222]],3.2); walkway([[112,201],[103,201]],3.2); // paths to Costco doors
+// --- gateway markers ---
+gate(88,-104,false); gate(18,108,false); gate(128,-22,false);
+gate(-118,-104,true); gate(132,250,true); gate(12,106,true);
+
+/* ============================================================
+   RESIDENTIAL — PARK + LANDSCAPE
+   ============================================================ */
+// organic POND
+const pondPts=[], pn=24, cxP=-10, czP=-6;
+const wob=[1,.9,1.08,.86,1.02,1.14,.92,.84,1.07,.9,1.0,1.1,.91,1.05,.85,1.06,.96,1.12,.88,1.0,.97,1.08,.9,1.03];
+for(let i=0;i<pn;i++){ const a=(i/pn)*Math.PI*2;
+  pondPts.push([cxP+Math.cos(a)*31*wob[i], czP+Math.sin(a)*25*wob[(i+5)%pn]]); }
+const pShape=new THREE.Shape(); pShape.moveTo(pondPts[0][0],-pondPts[0][1]);
+for(let i=1;i<pn;i++) pShape.lineTo(pondPts[i][0],-pondPts[i][1]); pShape.closePath();
+const waterGeo=new THREE.ShapeGeometry(pShape); waterGeo.rotateX(-Math.PI/2);
+const water=new THREE.Mesh(waterGeo,M.lake); water.position.y=0.18; water.receiveShadow=true; scene.add(water);
+const reeds=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1.0,40),M.reeds);
+reeds.scale.set(11,1,8); reeds.position.set(-26,0.55,4); reeds.castShadow=true; scene.add(reeds);
+const reeds2=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1.0,40),M.reeds);
+reeds2.scale.set(7,1,9); reeds2.position.set(8,0.55,-18); reeds2.castShadow=true; scene.add(reeds2);
+for(let z=-22;z<14;z+=3) rect(16,21,z,z+2.2,0.5,0,M.path);          // pond boardwalk
+
+// gardens, lawns, planting beds
+roofPad(20,86,-66,-6,0.2,M.garden);                                 // MFR courtyard garden
+[[-118,-82,58,92],[60,118,55,90],[-40,38,62,90]].forEach(b=>roofPad(b[0],b[1],b[2],b[3],0.16,M.terrace));
+[[-78,-58,40,52],[-30,-10,44,56],[30,52,46,60],[70,92,40,54]].forEach(b=>roofPad(b[0],b[1],b[2],b[3],0.18,M.flower));
+// hedges lining the main promenade + plaza
+hedge(-100,100,77,78.4); hedge(-100,100,90,91.4);
+hedge(14,92,-67.4,-66); hedge(14,92,-49.4,-48);
+// plaza at the MFR retail frontage
+rect(14,92,-66,-48,0.16,0,M.plaza,{cast:false});
+// park kiosk
+box(6.5,3,6.5,-46,0,32,M.mfr); 
+const kr=new THREE.Mesh(new THREE.ConeGeometry(5.4,3,4),M.mansard);
+kr.position.set(-46,4.5,32); kr.rotation.y=Math.PI/4; kr.castShadow=true; scene.add(kr);
+
+/* ============================================================
+   RESIDENTIAL PARKING DECK — green + solar roof
+   ============================================================ */
+const PD={x1:-124,x2:-110,z1:-80,z2:50,h:3.4};
+rect(PD.x1,PD.x2,PD.z1,PD.z2,0.2,0.02,M.asphalt,{cast:false});      // deck floor
+for(let z=PD.z1+8;z<PD.z2;z+=14){                                   // columns
+  rect(PD.x1+1,PD.x1+2.2,z-0.7,z+0.7,PD.h,0,M.metal,{edges:false});
+  rect(PD.x2-2.2,PD.x2-1,z-0.7,z+0.7,PD.h,0,M.metal,{edges:false}); }
+rect(PD.x1,PD.x2,PD.z1,PD.z2,0.5,PD.h,M.metal);                     // roof slab
+roofPad(PD.x1+1,PD.x2-1,PD.z1+1,PD.z2-1,PD.h+0.5,M.terrace);        // GREEN roof
+solarField(PD.x1,PD.x2,PD.z1+2,PD.z2-2,PD.h+0.5);                   // + SOLAR panels
+const cc=[0xb5453a,0x356a9c,0xcfcfcf,0x4a7a3a,0xd4843e];
+for(let z=PD.z1+9;z<PD.z2-4;z+=9.5) car(PD.x1+4,z,0,cc[(z|0)%5]);   // parked cars
+for(let z=PD.z1+9;z<PD.z2-4;z+=9.5) car(PD.x2-4,z,0,cc[(z*3|0)%5]);
+
+/* ============================================================
+   PBSA — brick dock-shed warehouses, 5 storeys + sawtooth roofs
+   ============================================================ */
+const FLOOR=3.5, H_PBSA=5*FLOOR;
+rect(-110,-44,-82,-10.77,H_PBSA,0,M.pbsa);
+sawtoothRoof(-110,-44,-82,-10.77,H_PBSA,6,3.6,M.slate);
+rect(-110,-49,2,52,H_PBSA,0,M.pbsa);
+sawtoothRoof(-110,-49,2,52,H_PBSA,4,3.6,M.slate);
+rect(-110.5,-43.5,-82.5,-10.27,1.6,0,M.metal);
+rect(-110.5,-48.5,1.5,52.5,1.6,0,M.metal);
+
+/* ============================================================
+   MULTIFAMILY — PARISIAN L-BLOCK, ELEVATED ON A PARKING GF
+   Ground floor = residents' parking (open, columns). The
+   residential mass is lifted one floor and gains a floor of
+   height. External staircases on the EAST and WEST give
+   access up to the elevated entrance level.
+   ============================================================ */
+const H_PARK_GF=FLOOR, H_BODY=6*FLOOR, CORNICE=H_PARK_GF+H_BODY;   // GF parking + 6 floors
+
+// --- GROUND-FLOOR PARKING PODIUM (open, columns, screened) ---
+function podium(x1,x2,z1,z2){
+  rect(x1,x2,z1,z2,0.25,0,M.asphalt,{cast:false});                 // deck floor
+  rect(x1,x2,z1,z1+1.5,1.7,0,M.podium,{edges:false});              // perimeter screen
+  rect(x1,x2,z2-1.5,z2,1.7,0,M.podium,{edges:false});
+  rect(x1,x1+1.5,z1,z2,1.7,0,M.podium,{edges:false});
+  rect(x2-1.5,x2,z1,z2,1.7,0,M.podium,{edges:false});
+  for(let x=x1+6;x<x2;x+=12){                                      // columns
+    rect(x-0.6,x+0.6,z1+0.4,z1+1.6,H_PARK_GF,0,M.metal,{edges:false});
+    rect(x-0.6,x+0.6,z2-1.6,z2-0.4,H_PARK_GF,0,M.metal,{edges:false}); }
+}
+podium(10,116,-100,-70); podium(84,125,-70,16);
+// parked cars in the podium
+const pc=[0xb5453a,0x356a9c,0xcfcfcf,0x4a7a3a,0xd4843e];
+for(let x=20;x<110;x+=13){ car(x,-94,0,pc[x%5]); car(x,-76,0,pc[(x*2)%5]); }
+for(let z=-60;z<12;z+=13){ car(92,z,Math.PI/2,pc[z%5]); car(116,z,Math.PI/2,pc[(z*2)%5]); }
+// stair / lift cores
+rect(46,54,-98,-90,H_PARK_GF,0,M.podium); rect(100,110,-22,-12,H_PARK_GF,0,M.podium);
+
+// --- LIMESTONE RESIDENTIAL MASS (lifted to y = H_PARK_GF) ---
+rect(10,116,-100,-70,H_BODY,H_PARK_GF,M.mfr);
+rect(84,125,-70,16,H_BODY,H_PARK_GF,M.mfr);
+prism([[116,-100],[117,-100],[125,-92],[125,-70],[116,-70]],H_BODY,H_PARK_GF,M.mfr);
+const rotR=20.5;
+const rotGeo=new THREE.CylinderGeometry(rotR,rotR,H_BODY,40,1,false,0,Math.PI); rotGeo.rotateY(-Math.PI/2);
+const rot=new THREE.Mesh(rotGeo,M.mfr); rot.position.set(104.5,H_PARK_GF+H_BODY/2,16);
+rot.castShadow=true; rot.receiveShadow=true; scene.add(rot);
+scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(rotGeo,25),edgeMat)).position.copy(rot.position);
+rect(8.5,117.5,-101.5,-68.5,0.9,CORNICE-0.9,M.mfr);
+rect(82.5,126.5,-70,17.5,0.9,CORNICE-0.9,M.mfr);
+for(const y of [H_PARK_GF+10.5,H_PARK_GF+17.5]){
+  rect(9,117,-101,-99.4,0.35,y,M.metal,{cast:false});
+  rect(125,126.6,-70,16,0.35,y,M.metal,{cast:false}); }
+for(const x of [24,52,80]) rect(x-4.5,x+4.5,-102,-100,H_BODY+0.9,H_PARK_GF,M.mfr);
+for(const z of [-50,-22,4]) rect(125,127.5,z-4.5,z+4.5,H_BODY+0.9,H_PARK_GF,M.mfr);
+mansard(10,116,-100,-70,CORNICE,4.6,M.mansard,0.58);
+mansard(84,125,-70,16,CORNICE,4.6,M.mansard,0.58);
+dormers(16,110,-100,-1,CORNICE,7); dormers(84,125,-70,-1,CORNICE+0.4,2);
+prism([[116,-100],[117,-100],[125,-92],[125,-70],[116,-70]],3.2,CORNICE,M.mansard);
+const coneGeo=new THREE.ConeGeometry(rotR+0.6,9,40,1,false,0,Math.PI); coneGeo.rotateY(-Math.PI/2);
+const cone=new THREE.Mesh(coneGeo,M.mansard); cone.position.set(104.5,CORNICE+4.5,16);
+cone.castShadow=true; scene.add(cone);
+
+// --- EXTERNAL STAIRCASES (east + west) up to the entrance level ---
+function extStair(fx1,fx2,z1,z2,climbDir,landAtX){
+  const n=20, tread=(fx2-fx1)/n, riser=H_PARK_GF/n;
+  for(let i=0;i<n;i++){
+    const a=fx1+i*tread,b=fx1+(i+1)*tread, lvl=climbDir>0?(i+1):(n-i);
+    rect(a,b,z1,z2,lvl*riser,0,M.mfr,{edges:false}); }
+  const topX=climbDir>0?fx2:fx1;
+  rect(Math.min(topX,landAtX),Math.max(topX,landAtX),z1,z2,H_PARK_GF,0,M.mfr,{edges:false});
+  for(const zz of [z1+0.4,z2-0.4]) for(let i=0;i<n;i+=2){
+    const xx=fx1+(i+0.6)*tread, lvl=climbDir>0?(i+1):(n-i);
+    rect(xx-0.22,xx+0.22,zz-0.22,zz+0.22,1.0,lvl*riser,M.metal,{edges:false}); }
+  box(Math.abs(landAtX-topX)+2,0.7,z2-z1+3,(topX+landAtX)/2,H_PARK_GF+3.0,(z1+z2)/2,M.mansardT,{edges:false});
+}
+extStair(-4,3,-92,-82,1,10);     // WEST stair
+extStair(132,139,-37,-27,-1,125); // EAST stair
+walkway([[-12,-87],[-4,-87]],4); walkway([[139,-32],[150,-32]],4);
+
+/* ============================================================
+   COMMERCIAL · COSTCO ZAC
+   ============================================================ */
+const H_COS=13;
+rect(-117,117,108,182,H_COS,0,M.costco);
+rect(-114,114,110,180,1.4,H_COS,M.costcoDark);
+finRowX(-113,113,108,-1,0,H_COS,11,1.2,1.3,M.costcoDark);
+rect(35,99,182,219.7,H_COS,0,M.costco);
+const capGeo=new THREE.CylinderGeometry(18.85,18.85,H_COS,36,1,false,0,Math.PI);
+const cap=new THREE.Mesh(capGeo,M.costco); cap.position.set(99,H_COS/2,200.85);
+cap.castShadow=true; cap.receiveShadow=true; scene.add(cap);
+scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(capGeo,25),edgeMat)).position.copy(cap.position);
+const canE=new THREE.Mesh(new THREE.CylinderGeometry(23.5,23.5,1.0,36,1,false,0,Math.PI),M.costcoDark);
+canE.position.set(99,5.0,200.85); canE.castShadow=true; scene.add(canE);
+rect(116,120,194,208,0.3,0,M.plaza,{cast:false});
+rect(52,82,217.5,219.7,H_COS-3,0,M.glass);
+box(34,1.0,9,67,5.2,224,M.costcoDark);
+rect(50,84,219.7,233,0.3,0,M.plaza,{cast:false});
+solarField(-113,109,112,178,H_COS);
+solarField(37,97,184,217,H_COS);
+
+// LOGISTICS — terraced + HELICAL RAMP across the whole south corner
+const H_LOG=7;
+terracedBar(-117,-49,182,328,H_LOG,3,9,'+x',M.logistics,M.sme,M.terrace);
+spiralRamp(-83,312,25,9,2*H_LOG,3);
+rect(-53,-40,322,328,1.0,H_LOG-1,M.steel);     // connector to L1
+rect(-58,-44,322,328,1.0,2*H_LOG-1,M.steel);   // connector to L2
+
+const SME_TOP=3*H_LOG;
+rect(-113,-71,195,300,6,SME_TOP,M.leisure);
+const vaultGeo=new THREE.CylinderGeometry(21,21,105,44); vaultGeo.rotateX(Math.PI/2);
+const vault=new THREE.Mesh(vaultGeo,M.leisure); vault.scale.set(1,0.30,1);
+vault.position.set(-92,SME_TOP+6,247.5); vault.castShadow=true; vault.receiveShadow=true; scene.add(vault);
+
+const H_RET=7.5;
+rect(-49,35,182,219.7,H_RET,0,M.retailC);
+rect(-49,-11.3,219.7,290.3,H_RET,0,M.retailC);
+rect(-49,35,290.3,328,H_RET,0,M.retailC);
+rect(-49,31.5,185.5,219.7,H_RET,H_RET,M.retailC);
+rect(-49,-14.8,223.2,286.8,H_RET,H_RET,M.retailC);
+rect(-49,31.5,290.3,324.5,H_RET,H_RET,M.retailC);
+solarField(-46,31.5,186,219,2*H_RET);
+solarField(-46,-14.8,224,286,2*H_RET);
+solarField(-46,31.5,291,324,2*H_RET);
+
+rect(-11.3,117,219.7,290.3,0.20,0.05,M.cpark,{cast:false});
+rect(35,75,290.3,328,0.20,0.05,M.cpark,{cast:false});
+rect(78,114,290,326,1.0,5.0,M.fuel);
+rect(94,98,306,310,5.0,0,M.fuel,{edges:false});
+[84,96,108].forEach(cx=>{ const p=new THREE.Mesh(new THREE.BoxGeometry(3,3.2,8),M.fuel);
+  p.position.set(cx,1.6,308); p.castShadow=true; scene.add(p); });
+// a few cars in the commercial car park
+const cc2=[0xb5453a,0x356a9c,0xcfcfcf,0x4a7a3a];
+for(let x=0;x<100;x+=14) for(let z=232;z<282;z+=24) car(x,z,0,cc2[(x+z|0)%4]);
+
+/* ============================================================
+   TRUCK YARD — dock-side maneuvering & loading lot
+   (loading canopy + gantries removed — now an open paved yard
+    where logistics vehicles turn and reach the loading docks)
+   ============================================================ */
+const dockWater=new THREE.Mesh(new THREE.BoxGeometry(27,0.5,210),M.dock);
+dockWater.position.set(-191,-0.15,250); dockWater.receiveShadow=true; scene.add(dockWater);
+rect(-178.5,-176,145,355,1.6,0,M.steel);                          // quay wall
+// large maneuvering / parking yard
+rect(-176,-118,166,340,0.24,0.02,M.asphalt,{cast:false});
+// raised loading-dock platform + dock-leveller bays along the logistics wall
+rect(-124,-117,182,328,1.3,0,M.steel);
+for(let z=190;z<326;z+=13) rect(-117.4,-116.6,z-4,z+4,4.5,1.3,M.costcoDark,{edges:false,cast:false});
+// yard markings — truck bays
+{ const m=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.4});
+  for(let z=176;z<338;z+=8) scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+    [new THREE.Vector3(-172,0.28,z),new THREE.Vector3(-128,0.28,z)]),m));
+  for(let x=-128;x>=-172;x-=14) scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+    [new THREE.Vector3(x,0.28,176),new THREE.Vector3(x,0.28,338)]),m)); }
+// trucks parked / maneuvering in the yard
+function truck(x,z,c){
+  rect(x-1.4,x+1.4,z-5.5,z+5.5,3.0,0.2,M.cpark,{edges:false});
+  rect(x-1.4,x+1.4,z+5.5,z+9.0,3.4,0.2,new THREE.MeshLambertMaterial({color:c}),{edges:false});
+}
+truck(-160,196,0xb5453a); truck(-146,196,0x2f6fa8); truck(-160,232,0x5a9e3a);
+truck(-146,232,0xd4843e); truck(-160,272,0x356a9c); truck(-146,272,0xb5453a);
+truck(-160,312,0x4a7a3a); truck(-146,312,0x2f6fa8);
+// trucks at the loading docks
+truck(-138,210,0xcfcfcf); truck(-138,250,0xd4843e); truck(-138,300,0x356a9c);
+
+/* ============================================================
+   TREES — varied planting
+   ============================================================ */
+function coneTree(x,z,sc=1){
+  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.4*sc,0.55*sc,3.2*sc,6),M.trunk);
+  tr.position.set(x,1.6*sc,z); tr.castShadow=true; scene.add(tr);
+  const cr=new THREE.Mesh(new THREE.ConeGeometry(2.8*sc,5.5*sc,8),M.crown);
+  cr.position.set(x,5.6*sc,z); cr.castShadow=true; scene.add(cr);
+}
+function roundTree(x,z,sc=1){
+  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.45*sc,0.6*sc,3.4*sc,6),M.trunk);
+  tr.position.set(x,1.7*sc,z); tr.castShadow=true; scene.add(tr);
+  const cr=new THREE.Mesh(new THREE.SphereGeometry(3.4*sc,10,8),M.crown2);
+  cr.position.set(x,6*sc,z); cr.scale.y=0.85; cr.castShadow=true; scene.add(cr);
+}
+const parkTrees=[[-100,72,1],[-86,84,.95],[-70,76,1.05],[-52,88,.9],[-34,80,1],[-16,90,.95],
+ [4,82,.9],[24,92,1],[44,82,.95],[64,88,.9],[86,80,1],[104,90,.95],
+ [-92,46,.9],[-86,-6,.95],[-44,40,.9],[-30,52,1],[26,40,.95],[44,46,.9],[58,38,1],
+ [50,-30,.9],[60,-44,1],[44,-52,.95],[34,-30,.9],[70,-32,1],[-30,-46,.9],[-12,-54,1],[6,-44,.95]];
+parkTrees.forEach((t,i)=>(i%2?roundTree:coneTree)(t[0],t[1],t[2]));
+for(let x=-104;x<=104;x+=26) coneTree(x,100,0.9);            // divider row
+[[120,150],[120,210],[120,270],[120,330]].forEach(t=>roundTree(t[0],t[1],0.95));
+// bushes along paths / pond
+[[-20,40],[-2,38],[14,42],[-40,46],[-58,44],[12,-8],[-30,-12],[18,8],[-44,22],
+ [40,-58],[58,-56],[-66,72],[-8,72],[60,72],[36,86]].forEach(b=>bush(b[0],b[1],1.6+(b[0]%3)*0.3));
+
+/* ============================================================
+   NORTH ARROW
+   ============================================================ */
+const naDisc=new THREE.Mesh(new THREE.CircleGeometry(5,32),new THREE.MeshBasicMaterial({color:0xf0f2f5}));
+naDisc.rotation.x=-Math.PI/2; naDisc.position.set(-150,0.32,-60); scene.add(naDisc);
+const naArrow=new THREE.Mesh(new THREE.ConeGeometry(2,6,4),new THREE.MeshBasicMaterial({color:0xd14545}));
+naArrow.rotation.set(-Math.PI/2,0,0); naArrow.position.set(-150,0.34,-63); scene.add(naArrow);
+const naRing=new THREE.Mesh(new THREE.RingGeometry(4.8,5.2,32),new THREE.MeshBasicMaterial({color:0x222,side:THREE.DoubleSide}));
+naRing.rotation.x=-Math.PI/2; naRing.position.set(-150,0.35,-60); scene.add(naRing);
+
+/* ============================================================
+   ANIMATION
+   ============================================================ */
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight); });
+let userInteracted=false;
+controls.addEventListener('start',()=>{ userInteracted=true; });
+function animate(){
+  requestAnimationFrame(animate);
+  if(!userInteracted){
+    const t=performance.now()*0.00006, cx=-15,cz=118,R=560;
+    camera.position.set(cx+Math.sin(t)*R,345,cz+Math.cos(t)*R);
+    camera.lookAt(cx,16,cz);
+  }
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+</script>
+</body>
+</html>
